@@ -65,40 +65,11 @@
 <script>
   import { marked } from 'marked';
   import htmlToPdfmake from 'html-to-pdfmake';
+  import pdfMake from 'pdfmake/build/pdfmake';
+  import pdfFonts from 'pdfmake/build/vfs_fonts';
 
-  // Dynamic import for pdfmake to handle module issues
-  let pdfMake: any;
-  
-  async function initPdfMake() {
-    if (!pdfMake) {
-      try {
-        const pdfMakeModule = await import('pdfmake/build/pdfmake');
-        const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
-        
-        pdfMake = pdfMakeModule.default || pdfMakeModule;
-        const fonts = pdfFontsModule.default || pdfFontsModule;
-        
-        console.log('pdfMake loaded:', pdfMake);
-        console.log('fonts loaded:', fonts);
-        
-        // Set VFS fonts - try multiple possible structures
-        if (fonts.pdfMake && fonts.pdfMake.vfs) {
-          pdfMake.vfs = fonts.pdfMake.vfs;
-        } else if (fonts.vfs) {
-          pdfMake.vfs = fonts.vfs;
-        } else {
-          // The fonts module might BE the vfs object itself
-          pdfMake.vfs = fonts;
-        }
-        
-        console.log('pdfMake.vfs set:', !!pdfMake.vfs);
-      } catch (error) {
-        console.error('Failed to load pdfmake:', error);
-        throw error;
-      }
-    }
-    return pdfMake;
-  }
+  // For pdfmake 0.2.15+, pdfFonts IS the vfs object
+  pdfMake.vfs = pdfFonts;
 
   // Configure marked options
   marked.setOptions({
@@ -148,7 +119,7 @@
   }
 
   // Download PDF function
-  async function downloadPDF() {
+  function downloadPDF() {
     try {
       const markdown = markdownInput.value;
 
@@ -159,14 +130,13 @@
 
       showStatus('Generating PDF...', 'info');
 
-      // Initialize pdfMake
-      const pdf = await initPdfMake();
-
       // Step 1: Markdown → HTML
       const html = marked.parse(markdown);
 
       // Step 2: HTML → pdfmake format
-      const pdfContent = htmlToPdfmake(html);
+      const pdfContent = htmlToPdfmake(html, {
+        window: window
+      });
 
       // Step 3: Create PDF document definition
       const docDefinition = {
@@ -174,6 +144,11 @@
         defaultStyle: {
           fontSize: 11,
           font: 'Roboto'
+        },
+        // Add explicit encoding
+        info: {
+          title: 'Markdown Document',
+          creator: 'MD2PDF',
         },
         styles: {
           'html-h1': {
@@ -235,7 +210,7 @@
       const timestamp = new Date().toISOString().slice(0, 10);
       const filename = `markdown-${timestamp}.pdf`;
 
-      pdf.createPdf(docDefinition).download(filename);
+      pdfMake.createPdf(docDefinition).download(filename);
 
       showStatus(`PDF downloaded: ${filename}`, 'success');
     } catch (error) {
