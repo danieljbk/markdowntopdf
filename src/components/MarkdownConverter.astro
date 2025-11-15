@@ -19,7 +19,8 @@
         <label for='theme-select'>Theme</label>
         <select id='theme-select'>
           <option value='laetus'>Laetus Black</option>
-          <option value='github'>GitHub Dark</option>
+          <option value='githubDark'>GitHub Dark</option>
+          <option value='githubLight'>GitHub Light</option>
         </select>
       </div>
     </div>
@@ -291,68 +292,21 @@
     color: #ef4444;
   }
 
-  /* Theme: Laetus Black */
-  .theme-laetus .preview-pane {
-    background: #0a0a0a;
-  }
-
+  /* Theme backgrounds for preview shell (markdown colors come from JS to keep
+     preview and PDF in sync). */
+  .theme-laetus .preview-pane,
   .theme-laetus #preview-wrapper {
     background: #0a0a0a;
   }
 
-  .theme-laetus .markdown-body {
-    background: #0a0a0a;
-    color: #f8f8f0;
-  }
-
-  .theme-laetus .markdown-body h1,
-  .theme-laetus .markdown-body h2,
-  .theme-laetus .markdown-body h3,
-  .theme-laetus .markdown-body h4,
-  .theme-laetus .markdown-body h5,
-  .theme-laetus .markdown-body h6 {
-    color: #ff5252;
-  }
-
-  .theme-laetus .markdown-body pre {
-    background-color: #141414;
-    border-radius: 8px;
-  }
-
-  .theme-laetus .markdown-body table {
-    background: #0a0a0a;
-  }
-
-  /* Theme: GitHub Dark (previous preview style) */
-  .theme-github .preview-pane {
-    background: #0d1117;
-  }
-
+  .theme-github .preview-pane,
   .theme-github #preview-wrapper {
     background: #0d1117;
   }
 
-  .theme-github .markdown-body {
-    background: #0d1117;
-    color: #c9d1d9;
-  }
-
-  .theme-github .markdown-body h1,
-  .theme-github .markdown-body h2,
-  .theme-github .markdown-body h3,
-  .theme-github .markdown-body h4,
-  .theme-github .markdown-body h5,
-  .theme-github .markdown-body h6 {
-    color: #e6edf3;
-  }
-
-  .theme-github .markdown-body pre {
-    background-color: #161b22;
-    border-radius: 8px;
-  }
-
-  .theme-github .markdown-body table {
-    background: #0d1117;
+  .theme-github-light .preview-pane,
+  .theme-github-light #preview-wrapper {
+    background: #ffffff;
   }
 
   button {

@@ -81,7 +81,7 @@ const defaultInput = `# Start typing your Markdown here...
 let hasEdited = false
 let scrollBarSync = false
 
-type ThemeId = 'laetus' | 'github'
+type ThemeId = 'laetus' | 'githubDark' | 'githubLight'
 let currentTheme: ThemeId = 'laetus'
 let laetusThemeLoaded = false
 
@@ -180,7 +180,7 @@ function createEditor() {
 
 function initTheme() {
   const stored = loadThemePreference()
-  const initial: ThemeId = stored === 'github' ? 'github' : 'laetus'
+  const initial: ThemeId = stored ?? 'laetus'
   currentTheme = initial
   themeSelect.value = initial
   applyTheme(initial)
@@ -198,14 +198,87 @@ function applyTheme(theme: ThemeId) {
     ensureLaetusThemeLoaded().then(() => {
       monaco.editor.setTheme('laetus-black')
     })
-  } else {
+  } else if (theme === 'githubDark') {
     defineGithubTheme()
     monaco.editor.setTheme('md2pdf-dark')
+  } else {
+    // GitHub Light uses Monaco's built-in light theme.
+    monaco.editor.setTheme('vs')
   }
 
-  appShell.classList.remove('theme-laetus', 'theme-github')
-  appShell.classList.add(theme === 'laetus' ? 'theme-laetus' : 'theme-github')
+  appShell.classList.remove(
+    'theme-laetus',
+    'theme-github',
+    'theme-github-light'
+  )
+  if (theme === 'laetus') {
+    appShell.classList.add('theme-laetus')
+  } else if (theme === 'githubDark') {
+    appShell.classList.add('theme-github')
+  } else {
+    appShell.classList.add('theme-github-light')
+  }
   saveThemePreference(theme)
+  updateMarkdownThemeCss(theme)
+}
+
+function getMarkdownThemeCss(theme: ThemeId): string {
+  // Shared markdown layout is provided by github-markdown-css; this function
+  // contains ONLY theme-specific overrides so preview and PDF stay in sync.
+  if (theme === 'laetus') {
+    return [
+      'body { background: #0a0a0a; color: #f8f8f0; }',
+      '.markdown-body { background: #0a0a0a; color: #f8f8f0; }',
+      '.markdown-body a { color: #40c4ff; }',
+      '.markdown-body a:hover { text-decoration: underline; }',
+      '.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { color: #ff5252; }',
+      '.markdown-body blockquote { color: #b2ff59; border-left-color: #b2ff59; }',
+      '.markdown-body pre { background-color: #141414; border-radius: 8px; }',
+      '.markdown-body table { background: #0a0a0a; }',
+      '.markdown-body code { color: #40c4ff; background-color: #141414; }',
+      '.markdown-body pre code { color: #f8f8f0; }',
+    ].join('\n')
+  }
+
+  if (theme === 'githubLight') {
+    return [
+      'body { background: #ffffff; color: #24292f; }',
+      '.markdown-body { background: #ffffff; color: #24292f; }',
+      '.markdown-body a { color: #0969da; }',
+      '.markdown-body a:hover { text-decoration: underline; }',
+      '.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { color: #1f2328; }',
+      '.markdown-body blockquote { color: #57606a; border-left-color: #d0d7de; }',
+      '.markdown-body pre { background-color: #f6f8fa; border-radius: 6px; }',
+      '.markdown-body table { background: #ffffff; }',
+      '.markdown-body code { color: #24292f; background-color: rgba(175, 184, 193, 0.2); }',
+    ].join('\n')
+  }
+
+  // Default: GitHub Dark
+  return [
+    'body { background: #0d1117; color: #c9d1d9; }',
+    '.markdown-body { background: #0d1117; color: #c9d1d9; }',
+    '.markdown-body a { color: #58a6ff; }',
+    '.markdown-body a:hover { text-decoration: underline; }',
+    '.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { color: #e6edf3; }',
+    '.markdown-body blockquote { color: #8b949e; border-left-color: #30363d; }',
+    '.markdown-body pre { background-color: #161b22; border-radius: 8px; }',
+    '.markdown-body table { background: #0d1117; }',
+    '.markdown-body code { color: #c9d1d9; background-color: #161b22; }',
+  ].join('\n')
+}
+
+function updateMarkdownThemeCss(theme: ThemeId) {
+  if (typeof document === 'undefined') return
+  let styleEl = document.getElementById(
+    'markdown-theme'
+  ) as HTMLStyleElement | null
+  if (!styleEl) {
+    styleEl = document.createElement('style')
+    styleEl.id = 'markdown-theme'
+    document.head.appendChild(styleEl)
+  }
+  styleEl.textContent = getMarkdownThemeCss(theme)
 }
 
 function defineGithubTheme() {
@@ -308,11 +381,10 @@ function saveThemePreference(theme: ThemeId) {
 function loadThemePreference(): ThemeId | null {
   try {
     const stored = localStorage.getItem(localStorageThemeKey)
-    return stored === 'github'
-      ? 'github'
-      : stored === 'laetus'
-      ? 'laetus'
-      : null
+    if (stored === 'laetus') return 'laetus'
+    if (stored === 'github' || stored === 'githubDark') return 'githubDark'
+    if (stored === 'githubLight') return 'githubLight'
+    return null
   } catch {
     return null
   }
@@ -417,6 +489,13 @@ async function triggerPrint() {
 function buildHtmlForWorker(): string {
   const contentHtml = previewOutput.innerHTML
 
+  const baseStyle = [
+    'body { margin: 0; padding: 24px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }',
+    '.markdown-body { box-sizing: border-box; max-width: 800px; margin: 0 auto; }',
+  ]
+
+  const themeCss = getMarkdownThemeCss(currentTheme)
+
   return [
     '<!doctype html>',
     '<html lang="en">',
@@ -427,8 +506,8 @@ function buildHtmlForWorker(): string {
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown.min.css" />',
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />',
     '<style>',
-    'body { margin: 0; padding: 24px; }',
-    '.markdown-body { box-sizing: border-box; max-width: 800px; margin: 0 auto; }',
+    baseStyle.join('\n'),
+    themeCss,
     '</style>',
     '</head>',
     '<body>',
