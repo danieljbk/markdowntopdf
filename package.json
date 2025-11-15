@@ -1,0 +1,17 @@
+{
+  "name": "md2pdf",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.15.7",
+    "html-to-pdfmake": "^2.5.32",
+    "marked": "^17.0.0",
+    "pdfmake": "^0.2.20"
+  }
+}
