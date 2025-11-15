@@ -10,6 +10,7 @@ A client-side Markdown to PDF converter built with Astro and pdfmake. Convert yo
 - 💎 **High quality** - Real PDFs with selectable, searchable text
 - 📱 **Responsive** - Works on desktop and mobile
 - 🎨 **Beautiful UI** - Modern dark theme with smooth animations
+- 🖼️ **Embedded images** - Remote images are fetched, converted to base64, and embedded (missing images are reported, not crashy)
 - ⌨️ **Keyboard shortcuts** - Ctrl/Cmd + Enter to preview
 
 ## 🛠️ Tech Stack
@@ -95,12 +96,18 @@ wrangler pages deploy dist --project-name=md2pdf
 - ✅ Headers (h1-h6)
 - ✅ Bold, italic, strikethrough
 - ✅ Links
-- ✅ Images
+- ✅ Images (http/https URLs are fetched and embedded; unreachable images become `[Image unavailable]` placeholders)
 - ✅ Inline code and code blocks
 - ✅ Lists (ordered and unordered)
 - ✅ Tables
 - ✅ Blockquotes
 - ✅ Horizontal rules
+
+### Known Limitations
+
+- ❌ LaTeX / MathJax syntax is rendered as plain text (no math rendering yet)
+- ❌ Images must be reachable over HTTP(S). CORS-protected or missing URLs are replaced with a textual placeholder and flagged in the status message.
+- ❌ External scripts/styles in Markdown are ignored for safety.
 
 ## 💰 Cost
 
@@ -162,10 +169,6 @@ MIT License - feel free to use this project for any purpose.
 - [marked](https://marked.js.org) - Markdown parser
 - [pdfmake](https://pdfmake.github.io/) - PDF generation
 - [html-to-pdfmake](https://github.com/Aymkdn/html-to-pdfmake) - HTML converter
-
-## 📚 Documentation
-
-For detailed implementation guide, see [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)
 
 ---
 
