@@ -1,26 +1,26 @@
 # Markdown to PDF Converter
 
-A client-side Markdown to PDF converter built with Astro and pdfmake. Convert your Markdown documents to professional PDFs instantly in your browser - no backend required!
+A client-side, GitHub-style Markdown rendering experience that relies on your browser’s built-in **Print → Save as PDF** dialog. No backend, no headless browser, and no pdfmake glue code.
 
 ## ✨ Features
 
-- 🚀 **Client-side processing** - Everything happens in your browser
-- 🔒 **Private** - Your documents never leave your device
-- ⚡ **Fast** - Instant preview and quick PDF generation
-- 💎 **High quality** - Real PDFs with selectable, searchable text
-- 📱 **Responsive** - Works on desktop and mobile
-- 🎨 **Beautiful UI** - Modern dark theme with smooth animations
-- 🖼️ **Embedded images** - Remote images are fetched, converted to base64, and embedded (missing images are reported, not crashy)
-- ⌨️ **Keyboard shortcuts** - Ctrl/Cmd + Enter to preview
+- 🚀 **Client-side processing** – Everything happens in your browser
+- 🔒 **Private** – Your documents never leave your device
+- ⚡ **Fast** – Instant preview, instant print dialog
+- 💎 **High quality** – Print dialog produces selectable, searchable PDFs
+- 📱 **Responsive** – Works on desktop and mobile
+- 🎨 **Beautiful UI** – GitHub-style Markdown rendered in a dark shell
+- 🧮 **KaTeX math** – Inline and block LaTeX render identically in preview and print
+- ⌨️ **Keyboard shortcuts** – Ctrl/Cmd + Enter to preview
 
 ## 🛠️ Tech Stack
 
-- **Astro** - Static site generator
-- **marked** - Markdown parser (16M downloads/week)
-- **html-to-pdfmake** - HTML to PDF converter
-- **pdfmake** - PDF generation engine
-- **Bun** - Fast JavaScript runtime
-- **Cloudflare Pages** - Hosting
+- **Astro** – Static site generator
+- **marked** – Markdown parser with GitHub-flavored Markdown support
+- **KaTeX** – Client-side LaTeX rendering
+- **github-markdown-css** – GitHub’s Markdown typography/spacing
+- **Bun** – Package manager/runtime
+- **Cloudflare Pages** – Hosting
 
 ## 🚀 Getting Started
 
@@ -86,17 +86,16 @@ wrangler pages deploy dist --project-name=md2pdf
 
 ## 📖 Usage
 
-1. **Type or paste** your Markdown in the left editor
-2. Click **"Preview"** to see the HTML rendering
-3. Click **"Download PDF"** to generate and download your PDF
-4. Use **Ctrl/Cmd + Enter** as a keyboard shortcut to preview
+1. **Type or paste** your Markdown in the editor (Ctrl/Cmd + Enter also triggers preview).
+2. Click **“Preview”** to re-render the GitHub-style HTML.
+3. Click **“Print / Save as PDF.”** When your browser’s print dialog opens, choose **Save as PDF** (Chrome/Edge/Firefox) or use the system PDF option (Safari/macOS).
 
 ### Supported Markdown Features
 
 - ✅ Headers (h1-h6)
 - ✅ Bold, italic, strikethrough
 - ✅ Links
-- ✅ Images (http/https URLs are fetched and embedded; unreachable images become `[Image unavailable]` placeholders)
+- ✅ Images (anything the browser can load over HTTP/S)
 - ✅ Inline code and code blocks
 - ✅ Lists (ordered and unordered)
 - ✅ Tables
@@ -105,9 +104,9 @@ wrangler pages deploy dist --project-name=md2pdf
 
 ### Known Limitations
 
-- ❌ LaTeX / MathJax syntax is rendered as plain text (no math rendering yet)
-- ❌ Images must be reachable over HTTP(S). CORS-protected or missing URLs are replaced with a textual placeholder and flagged in the status message.
-- ❌ External scripts/styles in Markdown are ignored for safety.
+- Printing relies on your browser’s dialog. Chrome/Edge/Firefox expose “Save as PDF” directly; Safari uses macOS’s PDF buttons.
+- Remote assets must load in the browser (CORS rules apply). If an image/font can’t load, it will not appear in the PDF either.
+- No server rendering. Extremely large Markdown files may be constrained by browser memory.
 
 ## 💰 Cost
 
@@ -131,28 +130,9 @@ md2pdf/
 │       └── index.astro              # Home page
 ├── public/
 │   └── favicon.svg
-├── docs/
-│   └── IMPLEMENTATION.md            # Full implementation guide
 ├── astro.config.mjs                 # Astro configuration
 ├── package.json
 └── README.md
-```
-
-## 🔧 Configuration
-
-### PDF Customization
-
-You can customize PDF output by modifying the `docDefinition` in `src/components/MarkdownConverter.astro`:
-
-```javascript
-const docDefinition = {
-  content: pdfContent,
-  defaultStyle: {
-    fontSize: 11,        // Change font size
-    font: 'Roboto'       // Change font family
-  },
-  pageMargins: [50, 50, 50, 50]  // Adjust margins [left, top, right, bottom]
-}
 ```
 
 ## 🤝 Contributing
@@ -165,11 +145,11 @@ MIT License - feel free to use this project for any purpose.
 
 ## 🙏 Acknowledgments
 
-- [Astro](https://astro.build) - Static site generator
-- [marked](https://marked.js.org) - Markdown parser
-- [pdfmake](https://pdfmake.github.io/) - PDF generation
-- [html-to-pdfmake](https://github.com/Aymkdn/html-to-pdfmake) - HTML converter
+- [Astro](https://astro.build) – Static site generator
+- [marked](https://marked.js.org) – Markdown parser
+- [KaTeX](https://katex.org/) – LaTeX rendering
+- [github-markdown-css](https://github.com/sindresorhus/github-markdown-css) – GitHub’s Markdown styles
 
 ---
 
-**Built with ❤️ using Astro, pdfmake, and Bun**
+**Built with ❤️ using Astro, KaTeX, marked, and Bun**

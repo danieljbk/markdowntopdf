@@ -51,11 +51,16 @@
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            Download PDF
+            Print / Save as PDF
           </button>
         </div>
       </div>
-      <div id="preview-output" class="preview-content"></div>
+      <p class="print-hint">Use “Print / Save as PDF” to open your browser’s print dialog and export exactly what you see.</p>
+      <div class="preview-content">
+        <div class="preview-scroll">
+          <article id="preview-output" class="markdown-body"></article>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -135,6 +140,13 @@
     gap: 0.5rem;
   }
 
+  .print-hint {
+    margin: 0 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-text-dim);
+  }
+
   #markdown-input {
     flex: 1;
     width: 100%;
@@ -156,95 +168,47 @@
   .preview-content {
     flex: 1;
     padding: 1.5rem;
-    overflow-y: auto;
+    overflow: hidden;
     background: var(--color-surface);
   }
 
-  /* Preview content styling */
-  .preview-content :global(h1),
-  .preview-content :global(h2),
-  .preview-content :global(h3),
-  .preview-content :global(h4),
-  .preview-content :global(h5),
-  .preview-content :global(h6) {
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-    line-height: 1.25;
-  }
-
-  .preview-content :global(h1) { font-size: 2rem; }
-  .preview-content :global(h2) { font-size: 1.5rem; }
-  .preview-content :global(h3) { font-size: 1.25rem; }
-
-  .preview-content :global(p) {
-    margin-bottom: 1rem;
-  }
-
-  .preview-content :global(a) {
-    color: var(--color-accent);
-    text-decoration: none;
-  }
-
-  .preview-content :global(a:hover) {
-    text-decoration: underline;
-  }
-
-  .preview-content :global(ul),
-  .preview-content :global(ol) {
-    margin-left: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .preview-content :global(li) {
-    margin-bottom: 0.25rem;
-  }
-
-  .preview-content :global(code) {
-    background: var(--color-bg);
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-    font-family: var(--font-mono);
-    font-size: 0.875em;
-  }
-
-  .preview-content :global(pre) {
-    background: var(--color-bg);
-    padding: 1rem;
-    border-radius: 6px;
-    overflow-x: auto;
-    margin-bottom: 1rem;
-  }
-
-  .preview-content :global(pre code) {
-    background: none;
-    padding: 0;
-  }
-
-  .preview-content :global(blockquote) {
-    border-left: 3px solid var(--color-accent);
-    padding-left: 1rem;
-    margin: 1rem 0;
-    color: var(--color-text-dim);
-    font-style: italic;
-  }
-
-  .preview-content :global(table) {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-  }
-
-  .preview-content :global(th),
-  .preview-content :global(td) {
+  .preview-scroll {
+    height: 100%;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: #0d1117;
+    border-radius: 12px;
     border: 1px solid var(--color-border);
-    padding: 0.5rem;
-    text-align: left;
   }
 
-  .preview-content :global(th) {
-    background: var(--color-bg);
-    font-weight: 600;
+  .markdown-body {
+    box-sizing: border-box;
+    background: #0d1117;
+    color: #c9d1d9;
+    width: 100%;
+    max-width: none;
+  }
+
+  .markdown-body h1,
+  .markdown-body h2,
+  .markdown-body h3,
+  .markdown-body h4,
+  .markdown-body h5,
+  .markdown-body h6 {
+    color: #e6edf3;
+  }
+
+  .markdown-body code {
+    font-family: var(--font-mono);
+  }
+
+  .markdown-body pre {
+    background-color: #161b22;
+    border-radius: 8px;
+  }
+
+  .markdown-body table {
+    background: #0d1117;
   }
 
   .empty-state,
@@ -333,6 +297,52 @@
   .status-message.info {
     border-color: var(--color-accent);
     color: var(--color-accent);
+  }
+
+  @media print {
+    body {
+      background: #fff;
+    }
+
+    .converter {
+      padding: 0;
+      min-height: auto;
+    }
+
+    .header,
+    .editor-panel,
+    .panel-header,
+    .button-group,
+    #status-message {
+      display: none !important;
+    }
+
+    .container {
+      display: block;
+    }
+
+    .preview-panel {
+      border: none;
+      height: auto;
+      min-height: auto;
+    }
+
+    .preview-content {
+      padding: 0;
+      background: transparent;
+    }
+
+    .preview-scroll {
+      overflow: visible;
+      padding: 0;
+      border: none;
+      background: #fff;
+    }
+
+    .markdown-body {
+      background: #fff;
+      color: #24292f;
+    }
   }
 </style>
 
