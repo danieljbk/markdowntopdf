@@ -513,6 +513,8 @@ function buildHtmlForWorker(): string {
   const contentHtml = previewOutput.innerHTML
 
   const baseStyle = [
+    // Use full-bleed pages; inner spacing is controlled by body padding.
+    '@page { margin: 0; }',
     'body { margin: 0; padding: 24px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }',
     '.markdown-body { box-sizing: border-box; max-width: 800px; margin: 0 auto; }',
   ]

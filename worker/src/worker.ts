@@ -120,15 +120,12 @@ export default {
       // Load content; networkidle0 ensures external CSS/fonts load if referenced.
       await page.setContent(html, { waitUntil: 'networkidle0' })
 
+      // Use Chrome's built‑in print engine to generate a **text‑based** PDF
+      // instead of rasterizing the page. preferCSSPageSize lets the HTML
+      // document control page size and margins via @page rules.
       const pdfBuffer = await page.pdf({
-        format: 'A4',
         printBackground: true,
-        margin: {
-          top: '20mm',
-          right: '15mm',
-          bottom: '20mm',
-          left: '15mm',
-        },
+        preferCSSPageSize: true,
       })
 
       await page.close()

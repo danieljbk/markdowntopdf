@@ -25,6 +25,7 @@ Later, we can migrate Markdown → HTML rendering into the worker, but that is s
 ### 2.1 Components
 
 - **Frontend (Cloudflare Pages, Astro app)**
+
   - Current implementation (Markdown editor + GitHub‑style preview + KaTeX).
   - New: `Download PDF` button that POSTs to the worker.
 
@@ -148,16 +149,18 @@ export default {
     try {
       payload = await request.json()
     } catch {
-      return new Response(
-        JSON.stringify({ error: 'Invalid JSON body' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      )
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     const html = payload.html
     if (!html || typeof html !== 'string') {
       return new Response(
-        JSON.stringify({ error: '`html` field is required and must be a string' }),
+        JSON.stringify({
+          error: '`html` field is required and must be a string',
+        }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }
@@ -194,10 +197,10 @@ export default {
       })
     } catch (error) {
       console.error('Render error:', error)
-      return new Response(
-        JSON.stringify({ error: 'Failed to render PDF' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      )
+      return new Response(JSON.stringify({ error: 'Failed to render PDF' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
   },
 }
@@ -263,7 +266,8 @@ On the frontend (inside the Astro component’s script):
 ```ts
 async function downloadPdf() {
   try {
-    const markdownHtml = document.getElementById('preview-output')?.innerHTML ?? ''
+    const markdownHtml =
+      document.getElementById('preview-output')?.innerHTML ?? ''
     if (!markdownHtml.trim()) {
       showStatus('Nothing to export. Generate a preview first.', 'error')
       return
@@ -344,10 +348,12 @@ KV integration is optional and can be added later.
 ## 7. Security & Hardening
 
 - **Input size limits:**
+
   - Reject payloads over a reasonable size (e.g. 1–2 MB of HTML).
   - This prevents abuse and keeps render times predictable.
 
 - **Content sanitization:**
+
   - Because the HTML is produced by our own frontend, XSS risk is low, but it’s still good practice to:
     - Strip `<script>` tags.
     - Restrict inline event handlers.
@@ -394,6 +400,4 @@ This document should be sufficient for another engineer to:
 
 1. Stand up the Browser Rendering worker.
 2. Wire the existing frontend to use it.
-3. Reason about costs, security, and future enhancements. 
-
-
+3. Reason about costs, security, and future enhancements.
