@@ -12,7 +12,8 @@
     "astro": "^5.15.7",
     "github-markdown-css": "^5.8.1",
     "katex": "^0.16.25",
-    "marked": "^17.0.0"
+    "marked": "^17.0.0",
+    "monaco-editor": "^0.52.2"
   },
   "devDependencies": {
     "playwright": "^1.56.1"
