@@ -30,7 +30,7 @@
         <button
           id='download-btn'
           class='btn-primary'
-          title='Open the print dialog to save as PDF'
+          title='Generate and download a PDF via the Cloudflare worker'
         >
           <svg
             width='16'
@@ -486,31 +486,5 @@
   .status-message.info {
     border-color: var(--color-accent);
     color: var(--color-accent);
-  }
-
-  @media print {
-    .app-header,
-    #status-message,
-    #split-divider,
-    #edit {
-      display: none !important;
-    }
-
-    .app-shell,
-    #container,
-    #preview,
-    #preview-wrapper {
-      margin: 0;
-      padding: 0;
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
-      background: #fff;
-    }
-
-    .markdown-body {
-      background: #fff;
-      color: #24292f;
-    }
   }
 </style>

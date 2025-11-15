@@ -52,6 +52,17 @@ const syncCheckbox: HTMLInputElement = syncCheckboxEl
 const appShell: HTMLElement = appShellEl
 const themeSelect: HTMLSelectElement = themeSelectEl
 
+// If the Cloudflare worker URL is not configured, disable the download button
+// entirely so there is no browser-print fallback path.
+if (!WORKER_PDF_URL) {
+  console.warn(
+    'PUBLIC_WORKER_PDF_URL is not configured; PDF download is disabled.'
+  )
+  downloadBtn.disabled = true
+  downloadBtn.title =
+    'PDF worker is not configured. Set PUBLIC_WORKER_PDF_URL to enable downloads.'
+}
+
 type StatusType = 'success' | 'error' | 'info'
 
 const localStorageNamespace = 'com.md2pdf'
@@ -446,12 +457,11 @@ async function triggerPrint() {
   try {
     renderPreview(editor.getValue())
 
-    // If the worker URL is not configured, fall back to the browser's print dialog.
     if (!WORKER_PDF_URL) {
-      showStatus('Worker URL not configured, using browser print…', 'info')
-      requestAnimationFrame(() => {
-        window.print()
-      })
+      showStatus(
+        'PDF worker URL is not configured. Set PUBLIC_WORKER_PDF_URL to enable downloads.',
+        'error'
+      )
       return
     }
 

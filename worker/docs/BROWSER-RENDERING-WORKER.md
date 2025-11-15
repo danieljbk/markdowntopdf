@@ -308,7 +308,7 @@ async function downloadPdf() {
 }
 ```
 
-Hook this up to the existing `Print / Save as PDF` button instead of `window.print()`.
+Hook this up to the existing **Download (PDF)** button so it uses the worker instead of any browser print logic.
 
 ---
 
@@ -387,7 +387,7 @@ This raises complexity somewhat but centralizes rendering and removes trust in t
 
 - **Current site:** stays as-is for editing and preview.
 - **New worker:** a dedicated Markdown‑HTML → PDF renderer using Cloudflare Browser Rendering.
-- **Integration:** switch the `Download PDF` button from `window.print()` to a POST → PDF download flow.
+- **Integration:** the **Download (PDF)** button uses a POST → PDF download flow instead of `window.print()`.
 - **Benefits:** high‑fidelity, text‑based PDFs with clickable links, minimal changes to existing UI, and bounded Browser Rendering usage strictly on explicit download actions.
 
 This document should be sufficient for another engineer to:
