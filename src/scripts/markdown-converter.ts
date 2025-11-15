@@ -75,6 +75,32 @@ self.MonacoEnvironment = {
   },
 }
 
+monaco.editor.defineTheme('md2pdf-dark', {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [
+    { token: '', foreground: 'c9d1d9', background: '0d1117' },
+    { token: 'keyword', foreground: 'ff7b72' },
+    { token: 'string', foreground: 'a5d6ff' },
+    { token: 'number', foreground: '79c0ff' },
+    { token: 'comment', foreground: '8b949e' },
+    { token: 'variable', foreground: 'e6edf3' },
+  ],
+  colors: {
+    'editor.background': '#0d1117',
+    'editor.foreground': '#c9d1d9',
+    'editorLineNumber.foreground': '#6e7681',
+    'editorLineNumber.activeForeground': '#c9d1d9',
+    'editorCursor.foreground': '#58a6ff',
+    'editor.selectionBackground': '#264f78',
+    'editor.inactiveSelectionBackground': '#161b22',
+    'editorGutter.background': '#0d1117',
+    'editorLineNumber.background': '#0d1117',
+    'editorIndentGuide.background': '#21262d',
+    'editorIndentGuide.activeBackground': '#3b4148',
+  },
+})
+
 const editor = createEditor()
 
 const lastContent = loadLastContent()
@@ -100,7 +126,7 @@ function createEditor() {
   const instance = monaco.editor.create(editorElement, {
     value: '',
     language: 'markdown',
-    theme: 'vs-dark',
+    theme: 'md2pdf-dark',
     fontFamily: 'var(--font-mono)',
     fontSize: 14,
     minimap: { enabled: false },

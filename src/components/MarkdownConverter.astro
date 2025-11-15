@@ -1,5 +1,4 @@
 ---
-import scriptSrc from '../scripts/markdown-converter.ts?url'
 // Client-only component
 ---
 
@@ -86,7 +85,9 @@ import scriptSrc from '../scripts/markdown-converter.ts?url'
   <div id='status-message' class='status-message'></div>
 </div>
 
-<script type='module' src={scriptSrc}></script>
+<script>
+  import '../scripts/markdown-converter.ts'
+</script>
 
 <style>
   :global(html, body) {
