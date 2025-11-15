@@ -75,31 +75,69 @@ self.MonacoEnvironment = {
   },
 }
 
-monaco.editor.defineTheme('md2pdf-dark', {
-  base: 'vs-dark',
-  inherit: true,
-  rules: [
-    { token: '', foreground: 'c9d1d9', background: '0d1117' },
-    { token: 'keyword', foreground: 'ff7b72' },
-    { token: 'string', foreground: 'a5d6ff' },
-    { token: 'number', foreground: '79c0ff' },
-    { token: 'comment', foreground: '8b949e' },
-    { token: 'variable', foreground: 'e6edf3' },
-  ],
-  colors: {
-    'editor.background': '#0d1117',
-    'editor.foreground': '#c9d1d9',
-    'editorLineNumber.foreground': '#6e7681',
-    'editorLineNumber.activeForeground': '#c9d1d9',
-    'editorCursor.foreground': '#58a6ff',
-    'editor.selectionBackground': '#264f78',
-    'editor.inactiveSelectionBackground': '#161b22',
-    'editorGutter.background': '#0d1117',
-    'editorLineNumber.background': '#0d1117',
-    'editorIndentGuide.background': '#21262d',
-    'editorIndentGuide.activeBackground': '#3b4148',
-  },
+applyLaetusTheme().catch((error) => {
+  console.warn('Failed to apply Laetus theme, falling back to default.', error)
 })
+
+async function applyLaetusTheme() {
+  try {
+    const response = await fetch('/laetus-blk-color-theme.json')
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const rawText = await response.text()
+    // Theme file is JSON with occasional line comments starting with //.
+    const cleanedText = rawText.replace(/^\s*\/\/.*$/gm, '')
+    const theme = JSON.parse(cleanedText) as {
+      tokenColors?: {
+        scope?: string | string[]
+        settings: {
+          foreground?: string
+          background?: string
+          fontStyle?: string
+        }
+      }[]
+      colors?: Record<string, string>
+    }
+
+    const rules: any[] = []
+    for (const tc of theme.tokenColors ?? []) {
+      const settings = tc.settings || {}
+      const scopes =
+        tc.scope === undefined
+          ? ['']
+          : Array.isArray(tc.scope)
+          ? tc.scope
+          : [tc.scope]
+
+      for (const scope of scopes) {
+        const rule: any = { token: scope }
+        if (settings.foreground) {
+          rule.foreground = settings.foreground.replace(/^#/, '')
+        }
+        if (settings.background) {
+          rule.background = settings.background.replace(/^#/, '')
+        }
+        if (settings.fontStyle) {
+          rule.fontStyle = settings.fontStyle
+        }
+        rules.push(rule)
+      }
+    }
+
+    monaco.editor.defineTheme('laetus-black', {
+      base: 'vs-dark',
+      inherit: true,
+      rules,
+      colors: theme.colors ?? {},
+    })
+
+    monaco.editor.setTheme('laetus-black')
+  } catch (error) {
+    console.warn('Error while loading Laetus theme:', error)
+  }
+}
 
 const editor = createEditor()
 
@@ -126,7 +164,7 @@ function createEditor() {
   const instance = monaco.editor.create(editorElement, {
     value: '',
     language: 'markdown',
-    theme: 'md2pdf-dark',
+    theme: 'laetus-black',
     fontFamily: 'var(--font-mono)',
     fontSize: 14,
     minimap: { enabled: false },
