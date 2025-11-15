@@ -1,5 +1,5 @@
 ---
-import scriptSrc from '../scripts/markdown-converter.ts?url';
+// No server-side code needed
 ---
 
 <div class="converter">
@@ -68,7 +68,7 @@ import scriptSrc from '../scripts/markdown-converter.ts?url';
   <div id="status-message" class="status-message"></div>
 </div>
 
-<script type="module" src={scriptSrc}></script>
+<script type="module" src="/markdown-converter.js"></script>
 
 <style>
   .converter {
