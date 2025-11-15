@@ -238,7 +238,10 @@ function getMarkdownThemeCss(theme: ThemeId): string {
       '.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { color: #ff5252; }',
       '.markdown-body blockquote { color: #b2ff59; border-left-color: #b2ff59; }',
       '.markdown-body pre { background-color: #141414; border-radius: 8px; }',
-      '.markdown-body table { background: #0a0a0a; }',
+      '.markdown-body table { background: #0a0a0a; border-collapse: collapse; }',
+      '.markdown-body table th, .markdown-body table td { border: 1px solid #2a2a2a; }',
+      '.markdown-body table th { background: #050506; color: #f8f8f0; }',
+      '.markdown-body table td { background: #0a0a0a; }',
       '.markdown-body code { color: #40c4ff; background-color: #141414; }',
       '.markdown-body pre code { color: #f8f8f0; }',
     ].join('\n')
@@ -253,7 +256,10 @@ function getMarkdownThemeCss(theme: ThemeId): string {
       '.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { color: #1f2328; }',
       '.markdown-body blockquote { color: #57606a; border-left-color: #d0d7de; }',
       '.markdown-body pre { background-color: #f6f8fa; border-radius: 6px; }',
-      '.markdown-body table { background: #ffffff; }',
+      '.markdown-body table { background: #ffffff; border-collapse: collapse; }',
+      '.markdown-body table th, .markdown-body table td { border: 1px solid #d0d7de; }',
+      '.markdown-body table th { background: #f6f8fa; }',
+      '.markdown-body table td { background: #ffffff; }',
       '.markdown-body code { color: #24292f; background-color: rgba(175, 184, 193, 0.2); }',
     ].join('\n')
   }
@@ -267,7 +273,10 @@ function getMarkdownThemeCss(theme: ThemeId): string {
     '.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { color: #e6edf3; }',
     '.markdown-body blockquote { color: #8b949e; border-left-color: #30363d; }',
     '.markdown-body pre { background-color: #161b22; border-radius: 8px; }',
-    '.markdown-body table { background: #0d1117; }',
+    '.markdown-body table { background: #0d1117; border-collapse: collapse; }',
+    '.markdown-body table th, .markdown-body table td { border: 1px solid #30363d; }',
+    '.markdown-body table th { background: #161b22; }',
+    '.markdown-body table td { background: #0d1117; }',
     '.markdown-body code { color: #c9d1d9; background-color: #161b22; }',
   ].join('\n')
 }
