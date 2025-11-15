@@ -9,6 +9,8 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@cloudflare/puppeteer": "^1.0.4",
+    "@cloudflare/workers-types": "^4.20251115.0",
     "astro": "^5.15.7",
     "github-markdown-css": "^5.8.1",
     "katex": "^0.16.25",
@@ -16,6 +18,7 @@
     "monaco-editor": "^0.52.2"
   },
   "devDependencies": {
-    "playwright": "^1.56.1"
+    "playwright": "^1.56.1",
+    "wrangler": "^4.47.0"
   }
 }

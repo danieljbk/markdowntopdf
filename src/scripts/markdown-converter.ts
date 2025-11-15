@@ -10,6 +10,16 @@ marked.setOptions({
   gfm: true,
 })
 
+// Public URL of the Cloudflare Browser Rendering worker endpoint.
+// Configure this in your Astro env as PUBLIC_WORKER_PDF_URL, e.g.:
+// PUBLIC_WORKER_PDF_URL="https://your-worker-subdomain.workers.dev/render-pdf"
+const WORKER_PDF_URL =
+  typeof import.meta !== 'undefined' &&
+  import.meta.env &&
+  (import.meta.env as any).PUBLIC_WORKER_PDF_URL
+    ? (import.meta.env as any).PUBLIC_WORKER_PDF_URL
+    : ''
+
 const previewOutputEl = document.getElementById('preview-output')
 const downloadBtn = document.getElementById('download-btn')
 const statusMessageEl = document.getElementById('status-message')
@@ -100,7 +110,9 @@ if (lastContent) {
   loadExampleDocument()
 }
 
-downloadBtn.addEventListener('click', triggerPrint)
+downloadBtn.addEventListener('click', () => {
+  void triggerPrint()
+})
 setupResetButton()
 setupCopyButton()
 initScrollBarSync(loadScrollBarSettings())
@@ -345,18 +357,95 @@ function previewMarkdown() {
   }
 }
 
-function triggerPrint() {
+async function triggerPrint() {
   try {
     renderPreview(editor.getValue())
-    showStatus('Opening print dialog…', 'info')
-    requestAnimationFrame(() => {
-      window.print()
+
+    // If the worker URL is not configured, fall back to the browser's print dialog.
+    if (!WORKER_PDF_URL) {
+      showStatus('Worker URL not configured, using browser print…', 'info')
+      requestAnimationFrame(() => {
+        window.print()
+      })
+      return
+    }
+
+    const html = buildHtmlForWorker()
+    const filename = createPdfFilename()
+
+    downloadBtn.disabled = true
+    showStatus('Generating PDF…', 'info')
+
+    const response = await fetch(WORKER_PDF_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ html, filename }),
     })
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '')
+      console.error('Worker error response:', response.status, text)
+      throw new Error(
+        `Worker returned HTTP ${response.status}${
+          text ? `: ${text.slice(0, 200)}` : ''
+        }`
+      )
+    }
+
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = filename
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(url)
+
+    showStatus('PDF downloaded', 'success')
   } catch (error) {
-    console.error('Print error:', error)
+    console.error('PDF generation error:', error)
     const message = error instanceof Error ? error.message : String(error)
-    showStatus(`Unable to print: ${message}`, 'error')
+    showStatus(`Unable to generate PDF: ${message}`, 'error')
+  } finally {
+    downloadBtn.disabled = false
   }
+}
+
+function buildHtmlForWorker(): string {
+  const contentHtml = previewOutput.innerHTML
+
+  return [
+    '<!doctype html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="utf-8" />',
+    '<title>Markdown to PDF</title>',
+    // Use CDN-hosted styles so the Browser Rendering worker can fetch them.
+    '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown.min.css" />',
+    '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />',
+    '<style>',
+    'body { margin: 0; padding: 24px; }',
+    '.markdown-body { box-sizing: border-box; max-width: 800px; margin: 0 auto; }',
+    '</style>',
+    '</head>',
+    '<body>',
+    '<article class="markdown-body">',
+    contentHtml,
+    '</article>',
+    '</body>',
+    '</html>',
+  ].join('')
+}
+
+function createPdfFilename(): string {
+  const now = new Date()
+  const yyyy = now.getFullYear()
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const dd = String(now.getDate()).padStart(2, '0')
+  return `markdown-${yyyy}-${mm}-${dd}.pdf`
 }
 
 function showStatus(message: string, type: StatusType) {
