@@ -300,48 +300,44 @@
   }
 
   @media print {
+    html,
     body {
-      background: #fff;
-    }
-
-    .converter {
+      margin: 0;
       padding: 0;
-      min-height: auto;
+      background: #fff;
     }
 
     .header,
     .editor-panel,
     .panel-header,
     .button-group,
-    #status-message {
+    #status-message,
+    .print-hint {
       display: none !important;
     }
 
-    .container {
-      display: block;
+    .converter,
+    .container,
+    .preview-panel,
+    .preview-content,
+    .preview-scroll {
+      margin: 0;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      background: #fff;
     }
 
     .preview-panel {
-      border: none;
       height: auto;
       min-height: auto;
-    }
-
-    .preview-content {
-      padding: 0;
-      background: transparent;
-    }
-
-    .preview-scroll {
-      overflow: visible;
-      padding: 0;
-      border: none;
-      background: #fff;
     }
 
     .markdown-body {
       background: #fff;
       color: #24292f;
+      max-width: 100%;
     }
   }
 </style>
