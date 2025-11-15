@@ -14,9 +14,10 @@
         <h2>Markdown Input</h2>
         <button id="clear-btn" class="btn-secondary">Clear</button>
       </div>
-      <textarea
-        id="markdown-input"
-        placeholder="# Start typing your Markdown here...
+      <div class="panel-body">
+        <textarea
+          id="markdown-input"
+          placeholder="# Start typing your Markdown here...
 
 ## Features
 - **Bold text**
@@ -30,8 +31,9 @@
 | Cell 1   | Cell 2   |
 
 > Blockquotes work too!"
-        spellcheck="false"
-      ></textarea>
+          spellcheck="false"
+        ></textarea>
+      </div>
     </div>
 
     <div class="preview-panel">
@@ -45,7 +47,7 @@
             </svg>
             Preview
           </button>
-          <button id="download-btn" class="btn-primary">
+          <button id="download-btn" class="btn-primary" title="Opens your browser print dialog (Save as PDF)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
@@ -55,8 +57,7 @@
           </button>
         </div>
       </div>
-      <p class="print-hint">Use “Print / Save as PDF” to open your browser’s print dialog and export exactly what you see.</p>
-      <div class="preview-content">
+      <div class="panel-body">
         <div class="preview-scroll">
           <article id="preview-output" class="markdown-body"></article>
         </div>
@@ -121,6 +122,18 @@
     min-height: 500px;
   }
 
+  .panel-body {
+    flex: 1;
+    padding: 0;
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  .panel-body textarea,
+  .panel-body .preview-scroll {
+    height: 100%;
+  }
+
   .panel-header {
     display: flex;
     justify-content: space-between;
@@ -140,20 +153,14 @@
     gap: 0.5rem;
   }
 
-  .print-hint {
-    margin: 0 1.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.85rem;
-    color: var(--color-text-dim);
-  }
-
   #markdown-input {
-    flex: 1;
     width: 100%;
+    height: 100%;
     padding: 1.5rem;
     background: var(--color-surface);
     color: var(--color-text);
     border: none;
+    border-radius: 0;
     outline: none;
     font-family: var(--font-mono);
     font-size: 0.9375rem;
@@ -165,20 +172,13 @@
     color: var(--color-text-dim);
   }
 
-  .preview-content {
-    flex: 1;
-    padding: 1.5rem;
-    overflow: hidden;
-    background: var(--color-surface);
-  }
-
   .preview-scroll {
     height: 100%;
     overflow-y: auto;
     padding: 1.5rem;
     background: #0d1117;
-    border-radius: 12px;
-    border: 1px solid var(--color-border);
+    border-radius: 0;
+    border: none;
   }
 
   .markdown-body {
@@ -311,15 +311,14 @@
     .editor-panel,
     .panel-header,
     .button-group,
-    #status-message,
-    .print-hint {
+    #status-message {
       display: none !important;
     }
 
     .converter,
     .container,
     .preview-panel,
-    .preview-content,
+    .panel-body,
     .preview-scroll {
       margin: 0;
       padding: 0;
@@ -332,6 +331,14 @@
     .preview-panel {
       height: auto;
       min-height: auto;
+    }
+
+    .preview-content {
+      overflow: visible;
+    }
+
+    .preview-scroll {
+      height: auto;
     }
 
     .markdown-body {

@@ -9,6 +9,7 @@ marked.setOptions({
 
 const markdownInput = document.getElementById('markdown-input');
 const previewOutput = document.getElementById('preview-output');
+const previewScroll = document.querySelector('.preview-scroll');
 const previewBtn = document.getElementById('preview-btn');
 const downloadBtn = document.getElementById('download-btn');
 const clearBtn = document.getElementById('clear-btn');
@@ -17,6 +18,7 @@ const statusMessage = document.getElementById('status-message');
 if (
   !(markdownInput instanceof HTMLTextAreaElement) ||
   !(previewOutput instanceof HTMLElement) ||
+  !(previewScroll instanceof HTMLElement) ||
   !(previewBtn instanceof HTMLButtonElement) ||
   !(downloadBtn instanceof HTMLButtonElement) ||
   !(clearBtn instanceof HTMLButtonElement) ||
@@ -52,6 +54,7 @@ function renderPreview(markdown: string) {
     ],
     throwOnError: false,
   });
+  attachLinkEnhancements();
 }
 
 function previewMarkdown() {
@@ -84,11 +87,6 @@ markdownInput.addEventListener('keydown', (e) => {
   }
 });
 
-if (!markdownInput.value.trim()) {
-  markdownInput.value = markdownInput.placeholder;
-  setTimeout(() => previewMarkdown(), 100);
-}
-
 downloadBtn.addEventListener('click', () => {
   try {
     renderPreview(markdownInput.value);
@@ -102,6 +100,101 @@ downloadBtn.addEventListener('click', () => {
     showStatus(`Unable to print: ${message}`, 'error');
   }
 });
+
+function attachLinkEnhancements() {
+  const anchors = previewOutput.querySelectorAll<HTMLAnchorElement>('a[href]');
+
+  anchors.forEach((anchor) => {
+    const href = anchor.getAttribute('href');
+    if (!href) {
+      return;
+    }
+
+    if (href.startsWith('#')) {
+      anchor.addEventListener('click', (event) => {
+        event.preventDefault();
+        scrollToHeading(href);
+      });
+    } else if (href.startsWith('http') || href.startsWith('https')) {
+      anchor.setAttribute('target', '_blank');
+      anchor.setAttribute('rel', 'noopener noreferrer');
+    }
+  });
+}
+
+function scrollToHeading(hash: string) {
+  const id = hash.replace(/^#/, '');
+  if (!id) return;
+
+  const target = previewOutput.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
+  if (!target) return;
+
+  const targetRect = target.getBoundingClientRect();
+  const scrollRect = previewScroll.getBoundingClientRect();
+  const offset = targetRect.top - scrollRect.top + previewScroll.scrollTop - 16;
+
+  previewScroll.scrollTo({
+    top: Math.max(offset, 0),
+    behavior: 'smooth',
+  });
+}
+
+function makeInternalLinksAbsolute() {
+  const anchors = previewOutput.querySelectorAll<HTMLAnchorElement>('a[data-original-href], a[href^="#"]');
+  anchors.forEach((anchor) => {
+    const href = anchor.getAttribute('href');
+    if (!href || !href.startsWith('#')) {
+      return;
+    }
+    anchor.dataset.originalHref = href;
+    const absolute = `${window.location.origin}${window.location.pathname}${href}`;
+    anchor.setAttribute('href', absolute);
+  });
+}
+
+function restoreInternalLinks() {
+  const anchors = previewOutput.querySelectorAll<HTMLAnchorElement>('a[data-original-href]');
+  anchors.forEach((anchor) => {
+    const original = anchor.dataset.originalHref;
+    if (!original) return;
+    anchor.setAttribute('href', original);
+    delete anchor.dataset.originalHref;
+  });
+}
+
+window.addEventListener('beforeprint', () => {
+  makeInternalLinksAbsolute();
+});
+
+window.addEventListener('afterprint', () => {
+  restoreInternalLinks();
+});
+
+async function loadInitialContent() {
+  if (markdownInput.value.trim()) {
+    renderPreview(markdownInput.value);
+    return;
+  }
+
+  try {
+    const response = await fetch('/example.md');
+    if (!response.ok) {
+      throw new Error(`Unable to load example (HTTP ${response.status})`);
+    }
+    const text = await response.text();
+    markdownInput.value = text;
+    renderPreview(text);
+    showStatus('Loaded example document', 'info');
+  } catch (error) {
+    console.warn('Example load failed:', error);
+    if (!markdownInput.value.trim() && markdownInput.placeholder) {
+      markdownInput.value = markdownInput.placeholder;
+      renderPreview(markdownInput.value);
+    }
+  }
+}
+
+loadInitialContent();
 
 export {};
 
