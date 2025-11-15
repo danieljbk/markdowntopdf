@@ -14,6 +14,8 @@ const previewOutputEl = document.getElementById('preview-output')
 const downloadBtn = document.getElementById('download-btn')
 const statusMessageEl = document.getElementById('status-message')
 const syncCheckboxEl = document.getElementById('sync-scroll-checkbox')
+const appShellEl = document.getElementById('app-shell')
+const themeSelectEl = document.getElementById('theme-select')
 
 if (!(previewOutputEl instanceof HTMLElement)) {
   throw new Error('Preview output element not found')
@@ -27,16 +29,25 @@ if (!(statusMessageEl instanceof HTMLDivElement)) {
 if (!(syncCheckboxEl instanceof HTMLInputElement)) {
   throw new Error('Sync scroll checkbox not found')
 }
+if (!(appShellEl instanceof HTMLElement)) {
+  throw new Error('App shell element not found')
+}
+if (!(themeSelectEl instanceof HTMLSelectElement)) {
+  throw new Error('Theme select element not found')
+}
 
 const previewOutput: HTMLElement = previewOutputEl
 const statusMessage: HTMLDivElement = statusMessageEl
 const syncCheckbox: HTMLInputElement = syncCheckboxEl
+const appShell: HTMLElement = appShellEl
+const themeSelect: HTMLSelectElement = themeSelectEl
 
 type StatusType = 'success' | 'error' | 'info'
 
 const localStorageNamespace = 'com.md2pdf'
 const localStorageContentKey = `${localStorageNamespace}:last_state`
 const localStorageScrollKey = `${localStorageNamespace}:scroll_sync`
+const localStorageThemeKey = `${localStorageNamespace}:theme`
 const confirmationMessage =
   'Are you sure you want to reset? Your changes will be lost.'
 const emptyStateHtml =
@@ -60,6 +71,10 @@ const defaultInput = `# Start typing your Markdown here...
 let hasEdited = false
 let scrollBarSync = false
 
+type ThemeId = 'laetus' | 'github'
+let currentTheme: ThemeId = 'laetus'
+let laetusThemeLoaded = false
+
 declare const self: any
 
 self.MonacoEnvironment = {
@@ -75,11 +90,142 @@ self.MonacoEnvironment = {
   },
 }
 
-applyLaetusTheme().catch((error) => {
-  console.warn('Failed to apply Laetus theme, falling back to default.', error)
-})
+const editor = createEditor()
 
-async function applyLaetusTheme() {
+const lastContent = loadLastContent()
+if (lastContent) {
+  presetValue(lastContent)
+} else {
+  presetValue(defaultInput)
+  loadExampleDocument()
+}
+
+downloadBtn.addEventListener('click', triggerPrint)
+setupResetButton()
+setupCopyButton()
+initScrollBarSync(loadScrollBarSettings())
+setupDivider()
+initTheme()
+
+function createEditor() {
+  const editorElement = document.getElementById('editor')
+  if (!(editorElement instanceof HTMLElement)) {
+    throw new Error('Editor container not found')
+  }
+
+  const instance = monaco.editor.create(editorElement, {
+    value: '',
+    language: 'markdown',
+    theme: 'vs-dark',
+    fontFamily: 'var(--font-mono)',
+    fontSize: 14,
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+    automaticLayout: true,
+    wordWrap: 'on',
+    renderLineHighlight: 'all',
+    scrollbar: {
+      vertical: 'visible',
+      horizontal: 'visible',
+    },
+    hover: { enabled: false },
+    quickSuggestions: false,
+    folding: false,
+  })
+
+  instance.onDidChangeModelContent(() => {
+    const value = instance.getValue()
+    const changed = value !== defaultInput
+    if (changed) {
+      hasEdited = true
+    }
+    convert(value)
+  })
+
+  instance.onDidScrollChange((event) => {
+    if (!scrollBarSync) {
+      return
+    }
+
+    const layoutInfo = instance.getLayoutInfo()
+    const maxScrollTop = Math.max(event.scrollHeight - layoutInfo.height, 1)
+    const scrollRatio = event.scrollTop / maxScrollTop
+
+    const previewColumn = document.getElementById('preview')
+    if (previewColumn) {
+      const targetY =
+        (previewColumn.scrollHeight - previewColumn.clientHeight) * scrollRatio
+      previewColumn.scrollTo({ top: targetY, behavior: 'auto' })
+    }
+  })
+
+  instance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+    previewMarkdown()
+  })
+
+  return instance
+}
+
+function initTheme() {
+  const stored = loadThemePreference()
+  const initial: ThemeId = stored === 'github' ? 'github' : 'laetus'
+  currentTheme = initial
+  themeSelect.value = initial
+  applyTheme(initial)
+
+  themeSelect.addEventListener('change', (event) => {
+    const target = event.currentTarget as HTMLSelectElement
+    const value = (target.value as ThemeId) || 'laetus'
+    applyTheme(value)
+  })
+}
+
+function applyTheme(theme: ThemeId) {
+  currentTheme = theme
+  if (theme === 'laetus') {
+    ensureLaetusThemeLoaded().then(() => {
+      monaco.editor.setTheme('laetus-black')
+    })
+  } else {
+    defineGithubTheme()
+    monaco.editor.setTheme('md2pdf-dark')
+  }
+
+  appShell.classList.remove('theme-laetus', 'theme-github')
+  appShell.classList.add(theme === 'laetus' ? 'theme-laetus' : 'theme-github')
+  saveThemePreference(theme)
+}
+
+function defineGithubTheme() {
+  monaco.editor.defineTheme('md2pdf-dark', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: '', foreground: 'c9d1d9', background: '0d1117' },
+      { token: 'keyword', foreground: 'ff7b72' },
+      { token: 'string', foreground: 'a5d6ff' },
+      { token: 'number', foreground: '79c0ff' },
+      { token: 'comment', foreground: '8b949e' },
+      { token: 'variable', foreground: 'e6edf3' },
+    ],
+    colors: {
+      'editor.background': '#0d1117',
+      'editor.foreground': '#c9d1d9',
+      'editorLineNumber.foreground': '#6e7681',
+      'editorLineNumber.activeForeground': '#c9d1d9',
+      'editorCursor.foreground': '#58a6ff',
+      'editor.selectionBackground': '#264f78',
+      'editor.inactiveSelectionBackground': '#161b22',
+      'editorGutter.background': '#0d1117',
+      'editorLineNumber.background': '#0d1117',
+      'editorIndentGuide.background': '#21262d',
+      'editorIndentGuide.activeBackground': '#3b4148',
+    },
+  })
+}
+
+async function ensureLaetusThemeLoaded() {
+  if (laetusThemeLoaded) return
   try {
     const response = await fetch('/laetus-blk-color-theme.json')
     if (!response.ok) {
@@ -133,85 +279,31 @@ async function applyLaetusTheme() {
       colors: theme.colors ?? {},
     })
 
-    monaco.editor.setTheme('laetus-black')
+    laetusThemeLoaded = true
   } catch (error) {
     console.warn('Error while loading Laetus theme:', error)
   }
 }
 
-const editor = createEditor()
-
-const lastContent = loadLastContent()
-if (lastContent) {
-  presetValue(lastContent)
-} else {
-  presetValue(defaultInput)
-  loadExampleDocument()
+function saveThemePreference(theme: ThemeId) {
+  try {
+    localStorage.setItem(localStorageThemeKey, theme)
+  } catch {
+    // ignore
+  }
 }
 
-downloadBtn.addEventListener('click', triggerPrint)
-setupResetButton()
-setupCopyButton()
-initScrollBarSync(loadScrollBarSettings())
-setupDivider()
-
-function createEditor() {
-  const editorElement = document.getElementById('editor')
-  if (!(editorElement instanceof HTMLElement)) {
-    throw new Error('Editor container not found')
+function loadThemePreference(): ThemeId | null {
+  try {
+    const stored = localStorage.getItem(localStorageThemeKey)
+    return stored === 'github'
+      ? 'github'
+      : stored === 'laetus'
+      ? 'laetus'
+      : null
+  } catch {
+    return null
   }
-
-  const instance = monaco.editor.create(editorElement, {
-    value: '',
-    language: 'markdown',
-    theme: 'laetus-black',
-    fontFamily: 'var(--font-mono)',
-    fontSize: 14,
-    minimap: { enabled: false },
-    scrollBeyondLastLine: false,
-    automaticLayout: true,
-    wordWrap: 'on',
-    renderLineHighlight: 'all',
-    scrollbar: {
-      vertical: 'visible',
-      horizontal: 'visible',
-    },
-    hover: { enabled: false },
-    quickSuggestions: false,
-    folding: false,
-  })
-
-  instance.onDidChangeModelContent(() => {
-    const value = instance.getValue()
-    const changed = value !== defaultInput
-    if (changed) {
-      hasEdited = true
-    }
-    convert(value)
-  })
-
-  instance.onDidScrollChange((event) => {
-    if (!scrollBarSync) {
-      return
-    }
-
-    const layoutInfo = instance.getLayoutInfo()
-    const maxScrollTop = Math.max(event.scrollHeight - layoutInfo.height, 1)
-    const scrollRatio = event.scrollTop / maxScrollTop
-
-    const previewColumn = document.getElementById('preview')
-    if (previewColumn) {
-      const targetY =
-        (previewColumn.scrollHeight - previewColumn.clientHeight) * scrollRatio
-      previewColumn.scrollTo({ top: targetY, behavior: 'auto' })
-    }
-  })
-
-  instance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-    previewMarkdown()
-  })
-
-  return instance
 }
 
 function convert(markdown: string) {
