@@ -136,6 +136,10 @@ function createEditor() {
     automaticLayout: true,
     wordWrap: 'on',
     renderLineHighlight: 'all',
+    padding: {
+      top: 24,
+      bottom: 24,
+    },
     scrollbar: {
       vertical: 'visible',
       horizontal: 'visible',
@@ -228,7 +232,7 @@ function getMarkdownThemeCss(theme: ThemeId): string {
   if (theme === 'laetus') {
     return [
       'body { background: #0a0a0a; color: #f8f8f0; }',
-      '.markdown-body { background: #0a0a0a; color: #f8f8f0; }',
+      '.markdown-body { background: #0a0a0a; color: #f8f8f0; padding-bottom: 2rem; }',
       '.markdown-body a { color: #40c4ff; }',
       '.markdown-body a:hover { text-decoration: underline; }',
       '.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { color: #ff5252; }',
@@ -243,7 +247,7 @@ function getMarkdownThemeCss(theme: ThemeId): string {
   if (theme === 'githubLight') {
     return [
       'body { background: #ffffff; color: #24292f; }',
-      '.markdown-body { background: #ffffff; color: #24292f; }',
+      '.markdown-body { background: #ffffff; color: #24292f; padding-bottom: 2rem; }',
       '.markdown-body a { color: #0969da; }',
       '.markdown-body a:hover { text-decoration: underline; }',
       '.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { color: #1f2328; }',
@@ -257,7 +261,7 @@ function getMarkdownThemeCss(theme: ThemeId): string {
   // Default: GitHub Dark
   return [
     'body { background: #0d1117; color: #c9d1d9; }',
-    '.markdown-body { background: #0d1117; color: #c9d1d9; }',
+    '.markdown-body { background: #0d1117; color: #c9d1d9; padding-bottom: 2rem; }',
     '.markdown-body a { color: #58a6ff; }',
     '.markdown-body a:hover { text-decoration: underline; }',
     '.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { color: #e6edf3; }',

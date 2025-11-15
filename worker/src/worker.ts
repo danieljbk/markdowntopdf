@@ -121,11 +121,14 @@ export default {
       await page.setContent(html, { waitUntil: 'networkidle0' })
 
       const pdfBuffer = await page.pdf({
+        format: 'A4',
         printBackground: true,
-        preferCSSPageSize: true,
-        // You can specify paper size explicitly if desired, e.g.:
-        // format: 'A4',
-        // margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' },
+        margin: {
+          top: '20mm',
+          right: '15mm',
+          bottom: '20mm',
+          left: '15mm',
+        },
       })
 
       await page.close()
